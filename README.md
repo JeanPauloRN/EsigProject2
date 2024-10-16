@@ -4,62 +4,17 @@
 
 Aplicações Usadas/Versão:
 
-- Kubectl
 - K3s
 - Tomcat 9
 - Jenkins Latest
 - Helm 
 - Kube Prometheus Stack
 
-Para gerenciamento Kubernetes vamos utilizar o K3s. Criaremos um cluster com apenas o master para realizar nosso laboratório dentro de uma máquina Debian 12.
+Para orquestração dos contêineres, utilizaremos o Kubernetes na distribuição K3s.. Criaremos um cluster com apenas o master para realizar nosso laboratório dentro de uma máquina Debian 12.
 
 Nesse cluster será feito deploy do nosso Tomcat com o Jenkins embutido. Usaremos o Helm para instalação do Kube Prometheus Stack que por sua vez já virá com as configurações padrão para monitoração com Prometheus e Grafana do nosso Cluster e consequentemente dos nossos Pods. 
 
 ---
-
-### Instalação do Kubectl
-
-Realizando atualização do sistema e instalando curl:
-
-```bash
-sudo apt update && sudo apt install curl -y
-```
-
-Baixando a versão recente do Kubectl:
-
-```bash
-curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-```
-
-Após usar do comando acima é necessário permitir a execução do binário baixado com o seguinte comando:
-
-```bash
-chmod +x ./kubectl
-```
-
-Agora, vamos mover esse binário para o PATH para permitir a execução dele em qualquer diretório:
-
-```bash
-sudo mv ./kubectl /usr/local/bin/kubectl
-```
-Para agilizar e otimizar a utilização dos comandos com o Kubectl vamos configurá-lo para que possa ser usado sem necessidade de sudo em nosso usuário.
-
-Criado pasta para o arquivo no nosso diretório de usuário:
-
-```bash
-mkdir -p ~/.kube
-```
-
-Copiando o arquivo para o direório criado:
-
-```bash
-sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
-```
-Pronto, agora podemos testar o uso no nosso usuário com o comando:
-
-```bash
-kubectl version --client
-```
 
 ### Instalação do K3s
 
@@ -72,7 +27,7 @@ sudo apt update && sudo apt install ca-certificates curl -y
 Após baixar a instalar os pacotes mais recentes no sistema, vamos fazer a instalação do K3s e iniciar o cluster com 1 node master com o seguinte comando:
 
 ```bash
-curl -sfL https://get.k3s.io |  sh -s - server --node-taint CriticalAddonsOnly=true:NoExecute --cluster-init
+curl -sfL https://get.k3s.io |  sh -s - server --cluster-init
 ```
 
 Após finalizado, vamos verificar se nosso K3s está rodando corretamente:
@@ -81,50 +36,11 @@ Após finalizado, vamos verificar se nosso K3s está rodando corretamente:
 k3s kubectl get nodes
 ```
 
-No meu caso, optei em usar um alias para executar apenas o comando kubectl para gerenciar meu K3s.
-
-Para isso, usei os seguintes comandos:
-
-```bash
-vim ~/.bashrc
-```
-
-Após acessar o arquivo inseri na última linha o conteúdo:
-
-```bash
-alias kubectl='sudo k3s kubectl'
-```
-
-Com a edição completa vamos recarregar as configurações do arquivo:
-
-```bash
-source ~/.bashrc
-```
-
-Configurações para manuseio finalizadas, vamos testar o alias com as permissões corretas:
-
-```bash
-kubectl get nodes
-```
-
 ---
 
 ### Instalação do Tomcat
 
-Vamos fazer a criação do nosso diretório de trabalho do ``Tomcat``, estando na home do usuário vamos criar as pastas e navegar:
-
-```bash
-mkdir esig
-```
-
-```bash
-mkdir esig/tomcat/
-```
-```bash
-cd esig/tomcat
-```
-
-Como indicado, vamos partir para criação dos nossos arquivos de deploy para nosso Tomcat baixando o ``jenkins.war`` para dentro da pasta webapps do ``Tomcat``.
+Como indicado, vamos partir para criação dos nossos arquivos de deploy para nosso Tomcat, baixando o ``jenkins.war`` para dentro da pasta webapps do ``Tomcat`` de forma automatizada no deployment.
 
 Para garantir o funcionamento do nosso ``Tomcat`` e ``Jenkins`` em modo persistente, precisamos que seja criado um pvc para armazenar as pastas ``/usr/local/tomcat/webapps`` do nosso ``Tomcat`` e a `` /root/.jenkins/`` do ``Jenkins``. A configuração anteriormente citada permite que após alterações e reinicialização do nosso container os dados sejam mantidos.
 
