@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+spec:
+  replicas: 1 #Especificamos 1 Réplica
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      initContainers: #Container de inicilização para download do arquivo do Jenkins
+      - name: download-jenkins
+        image: alpine:latest
+        command: ['sh', '-c', 'wget -O /tmp/jenkins.war https://get.jenkins.io/war-stable/2.462.3/jenkins.war'] #Comando para download do Jenkins
+        volumeMounts:
+        - name: tomcat-volume 
+          mountPath: /tmp
+      containers:
+      - name: tomcat
+        image: tomcat:9.0 #Especificação de imagem do tomcat 9
+        ports:
+        - containerPort: 8080 #Porta do Container
+        resources: #Definição de Recusos
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: tomcat-volume
+          mountPath: /usr/local/tomcat/webapps/ #Apontamento do Local para persistencia dos dados do tomcat
+        - name: jenkins-volume
+          mountPath: /root/.jenkins/  #Apontamento do Local para persistencia dos dados do Jenkins
+      volumes:
+      - name: tomcat-volume
+        persistentVolumeClaim:
+          claimName: tomcat-pvc #Apontamento do arquivo PVC criado anteriormente
+      - name: jenkins-volume
+        persistentVolumeClaim:
+          claimName: jenkins-pvc #Apontamento do arquivo PVC criado anteriormente

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080        # Porta interna do Tomcat
+    targetPort: 8080  # Porta externa
+  selector:
+    app: tomcat  # Seleciona o pod do Tomcat com base

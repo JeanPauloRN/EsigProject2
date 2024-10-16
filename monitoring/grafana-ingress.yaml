@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring #Especifica nosso namespace criado para o Kube Prometheus
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: grafana.work #Especifica o nome externo para acesso
+      http:
+        paths:
+          - backend:
+              service:
+                name: kube-prometheus-grafana
+                port:
+                  number: 80 #Porta interna do Grafana
+            path: /
+            pathType: Prefix
