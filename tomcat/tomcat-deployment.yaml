@@ -33,9 +33,9 @@ spec:
             cpu: "1"
         volumeMounts:
         - name: tomcat-volume
-          mountPath: /usr/local/tomcat/webapps/ #Apontamento do Local para persistencia dos dados do tomcat
+          mountPath: /usr/local/tomcat/webapps/ #Apontamento do Local para persistência dos dados do tomcat
         - name: jenkins-volume
-          mountPath: /root/.jenkins/  #Apontamento do Local para persistencia dos dados do Jenkins
+          mountPath: /root/.jenkins/  #Apontamento do Local para persistência dos dados do Jenkins
       volumes:
       - name: tomcat-volume
         persistentVolumeClaim:
