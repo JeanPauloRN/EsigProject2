@@ -203,7 +203,7 @@ kubectl get pods
 
 Com o uso desses recursos o nosso container do tomcat com já estará acessível pela url ``https://jenkins.work``.
 
-`Observação 1`: É necessário que a máquina usada para especifique em seu arquivo hosts que o nome ``jenkins.work`` seja resolvido para o IP do cluster, em nosso laboratório utilizamos o endereço ``192.168.0.19``.
+`Observação 1`: É necessário que a máquina usada para o acesso especifique em seu arquivo hosts que o nome ``jenkins.work`` seja resolvido para o IP do cluster, em nosso laboratório utilizamos o endereço ``192.168.0.19``.
 
 `Observação 2`: Embora a porta do container do ``Tomcat`` seja a 8080, nesse caso vamos utilizar ingress e fazemos o acesso na porta 443.
 
