@@ -2,17 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: tomcat-jenkins-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: traefik
 spec:
   rules:
-  - host: jenkins.work #Definição de nome jenkins.work para url de uso no acesso ao tomcat 
+  - host: jenkins.work
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: tomcat #Aponta para o service do tomcat
+            name: tomcat
             port:
-              number: 8080 #Aponta especificamente para porta 8080 do tomcat
+              number: 8080
