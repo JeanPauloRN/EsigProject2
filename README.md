@@ -10,7 +10,7 @@ Aplicações Usadas/Versão:
 - Helm 
 - Kube Prometheus Stack
 
-Para orquestração dos contêineres, utilizaremos o Kubernetes na distribuição K3s.. Criaremos um cluster com apenas o master para realizar nosso laboratório dentro de uma máquina Debian 12.
+Para orquestração dos contêineres, utilizaremos o Kubernetes na distribuição K3s. Criaremos um cluster com apenas o master para realizar nosso laboratório dentro de uma máquina Debian 12.
 
 Nesse cluster será feito deploy do nosso Tomcat com o Jenkins embutido. Usaremos o Helm para instalação do Kube Prometheus Stack que por sua vez já virá com as configurações padrão para monitoração com Prometheus e Grafana do nosso Cluster e consequentemente dos nossos Pods. 
 
@@ -44,7 +44,7 @@ Como indicado, vamos partir para criação dos nossos arquivos de deploy para no
 
 Para garantir o funcionamento do nosso ``Tomcat`` e ``Jenkins`` em modo persistente, precisamos que seja criado um pvc para armazenar as pastas ``/usr/local/tomcat/webapps`` do nosso ``Tomcat`` e a `` /root/.jenkins/`` do ``Jenkins``. A configuração anteriormente citada permite que após alterações e reinicialização do nosso container os dados sejam mantidos.
 
-Iremos iniciar a criação do PVC criando um arquivo para o tomcat com nome de ``tomcat-pvc.yaml`` com se seguinte conteúdo:
+Iremos iniciar a criação do PVC criando um arquivo para o tomcat com nome de ``tomcat-pvc.yaml`` com o seguinte conteúdo:
 
 ```bash
 apiVersion: v1
@@ -145,20 +145,20 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: tomcat-jenkins-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: traefik
 spec:
   rules:
-  - host: jenkins.work #Definição de nome jenkins.work para url de uso no acesso ao tomcat 
+  - host: jenkins.work
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: tomcat #Aponta para o service do tomcat
+            name: tomcat
             port:
-              number: 8080 #Aponta especificamente para porta 8080 do tomcat
+              number: 8080
 ```
 
 Após a criação, vamos subir cada arquivo do deploy para garantir que o funcionamento ocorra sem falhas na seguinte ordem e utilizando os comandos:
@@ -209,7 +209,7 @@ Com o uso desses recursos o nosso container do tomcat com já estará acessível
 
 Ao acessar a url será exibida a tela de primeiro acesso do ``Jenkins``, nesse momento existe a necessidade de acessar nosso container do tomcat para verificar qual é essa senha no arquivo ``initialAdminPassword``.
 
-Antes de acessar o container é necessário verificar qual seu nome para realizar o apontamento no comando seguinte, para visualizar o nome dos containers rodando usamos:
+Antes de acessar o container é necessário verificar qual seu nome para realizar o apontamento no comando seguinte. Para visualizar o nome dos containers em execução, utilizamos o comando:
 
 ```bash
 kubectl get pods
@@ -226,7 +226,7 @@ Dentro do nosso ``Tomcat`` vamos visualizar o arquivo com a senha:
 ```bash
 cat /root/.jenkins/secrets/initialAdminPassword
 ```
-Após visualizar a senha é possível acessar o ``Jenkins`` e fazer as configurações iniciais, no nosso caso a senha foi trocada para ``J3nk1nS@eSiG2024``.
+Após visualizar a senha é possível acessar o ``Jenkins`` e fazer as configurações iniciais. No nosso caso a senha foi trocada para ``J3nk1nS@eSiG2024``.
 
 Com as configurações acima realizadas, será possível reiniciar nossos containers e as configurações feitas no Jenkins são mantidas.
 
@@ -287,17 +287,7 @@ kubectl get pods -n monitoring
 
 Com os recursos devidamente instalados, agora podemos fazer as personalizações para que nosso grafana fique acessível externamente.
 
-Vamos começar criando e acessando uma nova pasta para organização do arquivo de ``Ingress`` do nosso Grafana:
-
-```bash
-mkdir ~/monitoring
-```
-
-```bash
-cd ~/monitoring
-```
-
-Agora vamos realizar a criação do ``Ingress`` e aplicá-lo para que nosso grafana fique acessível, ``grafana-ingress``:
+Para acessar a ferramenta externamente por nome, utilizaremos o ingress abaixo:
 
 ```bash
 apiVersion: networking.k8s.io/v1
@@ -326,9 +316,9 @@ Aplicando:
 kubectl apply -f grafana-ingress.yaml -n monitoring
 ```
 
-Após o comando de aplly o grafana estará acessível pelo endereço ``https://grafana.work``.
+Após o comando de Apply o grafana estará acessível pelo endereço ``https://grafana.work``.
 
-`Observação 1`: É necessário que a máquina usada para especifique em seu arquivo hosts que o nome ``grafana.work`` seja resolvido para o IP do cluster, em nosso laboratório utilizamos o endereço ``192.168.0.19``.
+`Observação 1`:  É necessário que na máquina hospedeira seja especificado em seu arquivo hosts que o nome seja ``grafana.work``, para ser resolvido ao IP do cluster, em nosso laboratório utilizamos o endereço ``192.168.0.19``.
 
 `Observação 2`: Embora a porta do container do ``Grafana`` seja a 80, nesse caso vamos utilizar ingress e fazemos o acesso na porta 443.
 
